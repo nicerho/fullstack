@@ -1,81 +1,60 @@
 import "./TodoApp.css";
-import { useState } from "react";
+import FooterComponent from "./FooterComponent";
+import HeaderComponent from "./HeaderComponent";
+import ListTodosComponent from "./ListtodoComponent";
+import WelcomeComponent from "./WelcomeComponent";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import LoginComponent from "./LoginComponent";
+import AuthProvider, { useAuth } from "./security/AuthContext";
+import LogoutComponent from "./LogoutComponent";
+import ErrorComponent from "./ErrorComponent";
+
+function AuthenticatedRouce({ children }) {
+  const authContext = useAuth();
+  if (authContext.isAuthenticated) {
+    return children;
+  } else {
+    return <Navigate to="/"></Navigate>;
+  }
+}
 export default function TodoApp() {
   return (
     <div className="TodoApp">
-      <LoginComponent />
-      {/* <WelcomeComponent /> */}
+      <AuthProvider>
+        <BrowserRouter>
+          <HeaderComponent />
+          <Routes>
+            <Route path="/" element={<LoginComponent />} />
+            <Route path="/login" element={<LoginComponent />} />
+            <Route
+              path="/welcome/:username"
+              element={
+                <AuthenticatedRouce>
+                  <WelcomeComponent />
+                </AuthenticatedRouce>
+              }
+            />
+            <Route
+              path="/todos"
+              element={
+                <AuthenticatedRouce>
+                  <ListTodosComponent />
+                </AuthenticatedRouce>
+              }
+            />
+            <Route
+              path="/logout"
+              element={
+                <AuthenticatedRouce>
+                  <LogoutComponent />
+                </AuthenticatedRouce>
+              }
+            />
+            <Route path="*" element={<ErrorComponent />} />
+          </Routes>
+          <FooterComponent />
+        </BrowserRouter>
+      </AuthProvider>
     </div>
   );
-}
-function LoginComponent() {
-  const [username, setUsername] = useState("ho");
-  const [userpassword, setUserPassword] = useState("1234");
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [showErrorMessage, setShowErrorMessage] = useState(false);
-
-  function handleUsernameChange(event) {
-    setUsername(event.target.value);
-  }
-  function handleUserpasswordChange(event) {
-    setUserPassword(event.target.value);
-  }
-  function handelSubmit() {
-    if (username === "ho" && userpassword === "1234") {
-      setShowSuccessMessage(true);
-      setShowErrorMessage(false);
-    } else {sdfsd
-      setShowErrorMessage(true);
-      setShowSuccessMessage(false);
-    }
-  }
-  function SuccessMessageComponent() {
-    if (showSuccessMessage) {
-      return <div className="successMessage">인증성공</div>;
-    } else {
-      return null;
-    }
-  }
-  function ErrorMessageComponent() {
-    if (showErrorMessage) {
-      return <div className="errorMessage">인증실패</div>;
-    } else {
-      return null;
-    }
-  }
-  return (
-    <div className="Login">
-      <SuccessMessageComponent />
-      <ErrorMessageComponent />
-      <div className="LoginForm">
-        <div>
-          <label>User Name : </label>
-          <input
-            type="text"
-            name="username"
-            value={username}
-            onChange={handleUsernameChange}
-          />
-        </div>
-        <div>
-          <label>Password : </label>
-          <input
-            type="password"
-            name="password"
-            value={userpassword}
-            onChange={handleUserpasswordChange}
-          />
-          <div>
-            <button type="button" name="login" onClick={handelSubmit}>
-              login
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function WelcomeComponent() {
-  return <div className="Welcome">Welcome</div>;
 }
